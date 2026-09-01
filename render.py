@@ -142,16 +142,9 @@ def _render_close_panel(close: dict | None) -> str:
 
     briefing = CloseBriefing.model_validate(close)
 
-    tags_html = "\n".join(
-        f'<span class="topic-tag">{_escape(t)}</span>' for t in briefing.topics_covered
-    )
-
     return f"""
   <div class="tab-panel" id="panel-close">
     <div class="panel-content">
-      <div class="topic-tags">
-        {tags_html}
-      </div>
       <div class="card">
         <p class="chat-text" id="closeText">{_escape_chat(briefing.text)}</p>
       </div>
@@ -278,21 +271,6 @@ def render_html(state: dict, generated_date) -> str:
     text-align: center;
     color: var(--sub);
     padding: 48px 22px;
-  }}
-  .topic-tags {{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 14px;
-  }}
-  .topic-tag {{
-    display: inline-block;
-    padding: 5px 12px;
-    border-radius: 999px;
-    background: #eef2ff;
-    color: var(--accent);
-    font-size: 0.78rem;
-    font-weight: 600;
   }}
   .hero-headline {{
     font-size: 1.35rem;

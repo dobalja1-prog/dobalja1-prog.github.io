@@ -5,7 +5,6 @@ from ai.client import ask_structured
 
 class CloseBriefing(BaseModel):
     text: str  # 항목 구분 없이 하나로 이어지는 시장마감 코멘트 전체
-    topics_covered: list[str]  # text에서 실제로 다룬 시장 흐름/주제 목록 (검수용)
 
 
 # 실제로 쓰던 마감 멘트 중, 톤/구성/분량이 서로 다른 것들을 골라 문체 예시로 사용.
@@ -219,13 +218,6 @@ def _build_prompt(snapshot: dict, articles: list[dict]) -> str:
   절반 수준, 약 5~6문단
 - 양쪽 지수가 같이 크게 움직였거나(대략 ±1.5% 초과) 특이 이슈가 많은
   날: 예시의 2/3~전체 수준, 약 7~10문단
-
-[topics_covered]
-text에서 실제로 다룬 시장 흐름/주제를 짧은 문구로 목록화하세요
-(예: "코스피·코스닥 디커플링", "외국인 수급", "중동 리스크·유가",
-"반도체 수출", "다음주 FOMC 경계"). 이건 화면에 보여주려는 게 아니라
-작성자가 오늘 브리핑에 어떤 흐름을 다뤘는지 한눈에 검수하기 위한
-목록이니, text 내용과 정확히 일치하게 뽑으세요.
 """
 
 

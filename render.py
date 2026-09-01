@@ -112,10 +112,20 @@ def render_html(briefing, generated_date) -> str:
     background: var(--accent);
     display: inline-block;
   }}
+  .hero-header {{
+    background: linear-gradient(135deg, var(--hero-bg-from), var(--hero-bg-to));
+    color: #fff;
+    padding: 20px 0 0;
+  }}
+  .hero-header-inner {{
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }}
   .hero {{
     background: linear-gradient(135deg, var(--hero-bg-from), var(--hero-bg-to));
     color: #fff;
-    padding: 32px 16px 28px;
+    padding: 20px 16px 28px;
   }}
   .hero-inner {{
     max-width: 720px;
@@ -124,7 +134,43 @@ def render_html(briefing, generated_date) -> str:
   .hero-date {{
     color: #a7adc7;
     font-size: 0.85rem;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
+  }}
+  .tabbar {{
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+  }}
+  .tab-btn {{
+    flex: 1;
+    padding: 11px 8px;
+    border: none;
+    border-radius: 10px 10px 0 0;
+    background: rgba(255,255,255,0.06);
+    color: #a7adc7;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+  }}
+  .tab-btn.active {{
+    background: var(--bg);
+    color: var(--text);
+  }}
+  .tab-panel {{
+    display: none;
+  }}
+  .tab-panel.active {{
+    display: block;
+  }}
+  .placeholder-card {{
+    max-width: 720px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+  }}
+  .placeholder-card .card {{
+    text-align: center;
+    color: var(--sub);
+    padding: 48px 22px;
   }}
   .hero-headline {{
     font-size: 1.35rem;
@@ -315,26 +361,51 @@ def render_html(briefing, generated_date) -> str:
     <div class="topbar-inner"><span class="dot"></span>주식 시장 브리핑</div>
   </div>
 
-  <div class="hero">
-    <div class="hero-inner">
-      <div class="hero-date">{date_str} ({weekday_kr}) · 개장 전 브리핑</div>
-      {_sentiment_badge(briefing.sentiment)}
-      <div class="hero-headline">{_escape(briefing.headline)}</div>
-      <div class="stats">
-        {stats_html}
+  <div class="hero-header">
+    <div class="hero-header-inner">
+      <div class="hero-date">{date_str} ({weekday_kr})</div>
+      <div class="tabbar">
+        <button class="tab-btn active" id="tabbtn-morning" onclick="switchTab('morning')">개장 전 브리핑</button>
+        <button class="tab-btn" id="tabbtn-lunch" onclick="switchTab('lunch')">점심시간</button>
+        <button class="tab-btn" id="tabbtn-close" onclick="switchTab('close')">시장마감</button>
       </div>
     </div>
   </div>
 
-  <div class="summary-btn-wrap">
-    <button class="summary-btn" onclick="document.getElementById('summaryModal').classList.add('open')">브리핑 요약하기</button>
+  <div class="tab-panel active" id="panel-morning">
+    <div class="hero">
+      <div class="hero-inner">
+        {_sentiment_badge(briefing.sentiment)}
+        <div class="hero-headline">{_escape(briefing.headline)}</div>
+        <div class="stats">
+          {stats_html}
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-btn-wrap">
+      <button class="summary-btn" onclick="document.getElementById('summaryModal').classList.add('open')">브리핑 요약하기</button>
+    </div>
+
+    <main>
+      {sections_html}
+    </main>
   </div>
 
-  <main>
-    {sections_html}
-  </main>
+  <div class="tab-panel" id="panel-lunch">
+    <div class="placeholder-card">
+      <div class="card">점심시간 브리핑은 아직 준비 중입니다.</div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-close">
+    <div class="placeholder-card">
+      <div class="card">시장마감 브리핑은 아직 준비 중입니다.</div>
+    </div>
+  </div>
+
   <footer>
-    이 페이지는 매일 아침 자동으로 수집·생성됩니다. 투자 판단의 참고용이며, 투자 조언이 아닙니다.
+    이 페이지는 매일 자동으로 수집·생성됩니다. 투자 판단의 참고용이며, 투자 조언이 아닙니다.
   </footer>
 
   <div class="modal-overlay" id="summaryModal">
@@ -353,6 +424,12 @@ def render_html(briefing, generated_date) -> str:
   </div>
 
   <script>
+    function switchTab(name) {{
+      ['morning', 'lunch', 'close'].forEach(function(n) {{
+        document.getElementById('panel-' + n).classList.toggle('active', n === name);
+        document.getElementById('tabbtn-' + n).classList.toggle('active', n === name);
+      }});
+    }}
     function copySummary() {{
       var text = document.getElementById('chatSummaryText').innerText;
       var btn = document.getElementById('copyBtn');

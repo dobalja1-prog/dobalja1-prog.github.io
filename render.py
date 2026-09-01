@@ -204,6 +204,96 @@ def render_html(briefing, generated_date) -> str:
     font-size: 0.8rem;
     text-align: center;
   }}
+  .summary-btn-wrap {{
+    max-width: 720px;
+    margin: 18px auto 0;
+    padding: 0 16px;
+  }}
+  .summary-btn {{
+    width: 100%;
+    padding: 13px 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+  }}
+  .summary-btn:hover {{
+    filter: brightness(1.08);
+  }}
+  .modal-overlay {{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 17, 26, 0.55);
+    z-index: 50;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+  }}
+  .modal-overlay.open {{
+    display: flex;
+  }}
+  .modal-box {{
+    background: var(--card-bg);
+    border-radius: 14px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 84vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }}
+  .modal-header {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+  }}
+  .modal-header h3 {{
+    margin: 0;
+    font-size: 1rem;
+  }}
+  .modal-close {{
+    border: none;
+    background: none;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--sub);
+    padding: 4px;
+  }}
+  .modal-body {{
+    padding: 18px;
+    overflow-y: auto;
+  }}
+  .chat-text {{
+    white-space: pre-wrap;
+    font-size: 0.92rem;
+    color: #222;
+    margin: 0;
+  }}
+  .modal-footer {{
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+  }}
+  .copy-btn {{
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+  }}
+  .copy-btn.copied {{
+    background: var(--up);
+  }}
 </style>
 </head>
 <body>
@@ -222,12 +312,60 @@ def render_html(briefing, generated_date) -> str:
     </div>
   </div>
 
+  <div class="summary-btn-wrap">
+    <button class="summary-btn" onclick="document.getElementById('summaryModal').classList.add('open')">브리핑 요약하기</button>
+  </div>
+
   <main>
     {sections_html}
   </main>
   <footer>
     이 페이지는 매일 아침 자동으로 수집·생성됩니다. 투자 판단의 참고용이며, 투자 조언이 아닙니다.
   </footer>
+
+  <div class="modal-overlay" id="summaryModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>브리핑 요약</h3>
+        <button class="modal-close" onclick="document.getElementById('summaryModal').classList.remove('open')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="chat-text" id="chatSummaryText">{html_lib.escape(briefing.chat_summary)}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="copy-btn" id="copyBtn" onclick="copySummary()">누르면 복사됩니다</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copySummary() {{
+      var text = document.getElementById('chatSummaryText').innerText;
+      var btn = document.getElementById('copyBtn');
+      function showCopied() {{
+        btn.textContent = '복사됐습니다!';
+        btn.classList.add('copied');
+        setTimeout(function() {{
+          btn.textContent = '누르면 복사됩니다';
+          btn.classList.remove('copied');
+        }}, 1500);
+      }}
+      if (navigator.clipboard && navigator.clipboard.writeText) {{
+        navigator.clipboard.writeText(text).then(showCopied);
+      }} else {{
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showCopied();
+      }}
+    }}
+    document.getElementById('summaryModal').addEventListener('click', function(e) {{
+      if (e.target === this) this.classList.remove('open');
+    }});
+  </script>
 </body>
 </html>
 """

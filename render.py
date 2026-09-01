@@ -4,6 +4,7 @@ import re
 from ai.sections import SECTIONS
 from ai.summarizer import MarketBriefing
 from ai.lunch import LunchBriefing
+from ai.close import CloseBriefing
 
 
 # 문장 종결 어미: "-습니다.", "-입니다.", "-이죠.", "-했죠." 등
@@ -135,13 +136,32 @@ def _render_lunch_panel(lunch: dict | None) -> str:
   </div>"""
 
 
+def _render_close_panel(close: dict | None) -> str:
+    if close is None:
+        return _placeholder_panel("close", "시장마감 브리핑은 아직 준비 중입니다.")
+
+    briefing = CloseBriefing.model_validate(close)
+
+    return f"""
+  <div class="tab-panel" id="panel-close">
+    <div class="panel-content">
+      <div class="card">
+        <p class="chat-text" id="closeText">{_escape_chat(briefing.text)}</p>
+      </div>
+      <div class="summary-btn-wrap" style="padding:0; margin-top:12px;">
+        <button class="copy-btn" id="copyBtn-closeText" onclick="copyText('closeText')">누르면 복사됩니다</button>
+      </div>
+    </div>
+  </div>"""
+
+
 def render_html(state: dict, generated_date) -> str:
     date_str = generated_date.strftime("%Y년 %m월 %d일")
     weekday_kr = ["월", "화", "수", "목", "금", "토", "일"][generated_date.weekday()]
 
     morning_panel, morning_modal = _render_morning_panel(state.get("morning"))
     lunch_panel = _render_lunch_panel(state.get("lunch"))
-    close_panel = _placeholder_panel("close", "시장마감 브리핑은 아직 준비 중입니다.")
+    close_panel = _render_close_panel(state.get("close"))
 
     return f"""<!DOCTYPE html>
 <html lang="ko">

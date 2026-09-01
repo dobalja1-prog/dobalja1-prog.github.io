@@ -1,6 +1,8 @@
 import html as html_lib
 import re
 
+from ai.sections import SECTIONS
+
 
 def _escape(text: str) -> str:
     # 문장이 "-습니다.", "-입니다." 등으로 끝날 때마다 줄바꿈을 넣어
@@ -43,7 +45,7 @@ def render_html(briefing, generated_date) -> str:
     sections_html = "\n".join(
         f"""
         <section class="card">
-          <h2><span class="num">{i+1}</span>{_escape(s.title)}</h2>
+          <h2><span class="num">{i+1}</span>{_escape(SECTIONS[i]["title"])}</h2>
           <p>{_escape(s.content)}</p>
         </section>"""
         for i, s in enumerate(briefing.sections)

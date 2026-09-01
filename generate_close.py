@@ -46,6 +46,10 @@ async def main():
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
+    print("\n오늘 마감 코멘트에 담긴 흐름:")
+    for topic in close.topics_covered:
+        print(" -", topic)
+
     print("\nindex.html 생성 완료 (시장마감)")
 
 

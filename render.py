@@ -11,6 +11,14 @@ def _escape(text: str) -> str:
     return html_lib.escape(text).replace("\n", "<br>")
 
 
+def _escape_chat(text: str) -> str:
+    # chat_summary는 AI가 이미 문단 사이에 빈 줄(\n\n)을 넣어서 보내주므로,
+    # 그 빈 줄은 그대로 두고 문단 "안"의 문장 사이에만 줄바꿈을 추가한다.
+    # (다음 글자가 공백이 아닌 경우 = 아직 같은 문단이 이어지는 경우만 매치)
+    text = re.sub(r"(다\.) (?=\S)", r"\1\n", text)
+    return html_lib.escape(text)
+
+
 def _change_color(change: str) -> str:
     # 국내 증시 관례: 상승=빨강, 하락=파랑
     if change.strip().startswith("-"):
@@ -332,7 +340,7 @@ def render_html(briefing, generated_date) -> str:
         <button class="modal-close" onclick="document.getElementById('summaryModal').classList.remove('open')">&times;</button>
       </div>
       <div class="modal-body">
-        <p class="chat-text" id="chatSummaryText">{html_lib.escape(briefing.chat_summary)}</p>
+        <p class="chat-text" id="chatSummaryText">{_escape_chat(briefing.chat_summary)}</p>
       </div>
       <div class="modal-footer">
         <button class="copy-btn" id="copyBtn" onclick="copySummary()">누르면 복사됩니다</button>

@@ -22,6 +22,7 @@ def get_index_snapshot(code):
 
     deal = integ.get("dealTrendInfo", {})
     updown = integ.get("upDownStockInfo", {})
+    totals = {t["code"]: t["value"] for t in integ.get("totalInfos", [])}
 
     return {
         "name": basic.get("stockName"),
@@ -29,9 +30,9 @@ def get_index_snapshot(code):
         "change": basic.get("compareToPreviousClosePrice"),
         "change_direction": basic.get("compareToPreviousPrice", {}).get("text"),
         "change_pct": basic.get("fluctuationsRatio"),
-        "open": basic.get("openPrice"),
-        "high": basic.get("highPrice"),
-        "low": basic.get("lowPrice"),
+        "open": totals.get("openPrice"),
+        "high": totals.get("highPrice"),
+        "low": totals.get("lowPrice"),
         "market_status": basic.get("marketStatus"),
         "foreign_net": deal.get("foreignValue"),
         "institution_net": deal.get("institutionalValue"),

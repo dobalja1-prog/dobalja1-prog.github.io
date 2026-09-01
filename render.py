@@ -1,7 +1,11 @@
 import html as html_lib
+import re
 
 
 def _escape(text: str) -> str:
+    # 문장이 "-습니다.", "-입니다." 등으로 끝날 때마다 줄바꿈을 넣어
+    # 한 문단이 길게 이어붙는 대신 문장 단위로 읽기 편하게 만든다.
+    text = re.sub(r"(다\.)(\s+)", r"\1\n", text)
     return html_lib.escape(text).replace("\n", "<br>")
 
 
@@ -186,6 +190,11 @@ def render_html(briefing, generated_date) -> str:
     margin: 0;
     font-size: 0.95rem;
     color: #333;
+  }}
+  .card p br {{
+    content: "";
+    display: block;
+    margin-top: 0.55em;
   }}
   footer {{
     max-width: 720px;

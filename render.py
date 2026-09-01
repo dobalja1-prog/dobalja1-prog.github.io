@@ -2,6 +2,8 @@ import html as html_lib
 import re
 
 from ai.sections import SECTIONS
+from ai.summarizer import MarketBriefing
+from ai.lunch import LunchBriefing
 
 
 # 문장 종결 어미: "-습니다.", "-입니다.", "-이죠.", "-했죠." 등
@@ -16,9 +18,8 @@ def _escape(text: str) -> str:
 
 
 def _escape_chat(text: str) -> str:
-    # chat_summary는 AI가 이미 문단 사이에 빈 줄(\n\n)을 넣어서 보내주므로,
-    # 그 빈 줄은 그대로 두고 문단 "안"의 문장 사이에만 줄바꿈을 추가한다.
-    # (다음 글자가 공백이 아닌 경우 = 아직 같은 문단이 이어지는 경우만 매치)
+    # 문단 사이의 빈 줄(\n\n)은 그대로 두고, 문단 "안"의 문장 사이에만
+    # 줄바꿈을 추가한다 (다음 글자가 공백이 아닌 경우 = 같은 문단이 이어지는 경우).
     text = re.sub(rf"({_SENTENCE_END}) (?=\S)", r"\1\n", text)
     return html_lib.escape(text)
 
@@ -40,9 +41,21 @@ def _sentiment_badge(sentiment: str) -> str:
     return f'<span class="badge" style="background:{color}">{_escape(sentiment)}</span>'
 
 
-def render_html(briefing, generated_date) -> str:
-    date_str = generated_date.strftime("%Y년 %m월 %d일")
-    weekday_kr = ["월", "화", "수", "목", "금", "토", "일"][generated_date.weekday()]
+def _placeholder_panel(panel_id: str, message: str) -> str:
+    return f"""
+  <div class="tab-panel" id="panel-{panel_id}">
+    <div class="panel-content">
+      <div class="card placeholder-msg">{message}</div>
+    </div>
+  </div>"""
+
+
+def _render_morning_panel(morning: dict | None) -> tuple[str, str]:
+    """(패널 HTML, 모달 HTML) 튜플을 반환. morning이 없으면 준비중 표시."""
+    if morning is None:
+        return _placeholder_panel("morning", "개장 전 브리핑은 아직 준비 중입니다."), ""
+
+    briefing = MarketBriefing.model_validate(morning)
 
     stats_html = "\n".join(
         f"""
@@ -62,6 +75,73 @@ def render_html(briefing, generated_date) -> str:
         </section>"""
         for i, s in enumerate(briefing.sections)
     )
+
+    panel = f"""
+  <div class="tab-panel active" id="panel-morning">
+    <div class="hero">
+      <div class="hero-inner">
+        {_sentiment_badge(briefing.sentiment)}
+        <div class="hero-headline">{_escape(briefing.headline)}</div>
+        <div class="stats">
+          {stats_html}
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-btn-wrap">
+      <button class="summary-btn" onclick="document.getElementById('summaryModal').classList.add('open')">브리핑 요약하기</button>
+    </div>
+
+    <main>
+      {sections_html}
+    </main>
+  </div>"""
+
+    modal = f"""
+  <div class="modal-overlay" id="summaryModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>브리핑 요약</h3>
+        <button class="modal-close" onclick="document.getElementById('summaryModal').classList.remove('open')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="chat-text" id="chatSummaryText">{_escape_chat(briefing.chat_summary)}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="copy-btn" id="copyBtn-chatSummaryText" onclick="copyText('chatSummaryText')">누르면 복사됩니다</button>
+      </div>
+    </div>
+  </div>"""
+
+    return panel, modal
+
+
+def _render_lunch_panel(lunch: dict | None) -> str:
+    if lunch is None:
+        return _placeholder_panel("lunch", "점심시간 브리핑은 아직 준비 중입니다.")
+
+    briefing = LunchBriefing.model_validate(lunch)
+
+    return f"""
+  <div class="tab-panel" id="panel-lunch">
+    <div class="panel-content">
+      <div class="card">
+        <p class="chat-text" id="lunchText">{_escape_chat(briefing.text)}</p>
+      </div>
+      <div class="summary-btn-wrap" style="padding:0; margin-top:12px;">
+        <button class="copy-btn" id="copyBtn-lunchText" onclick="copyText('lunchText')">누르면 복사됩니다</button>
+      </div>
+    </div>
+  </div>"""
+
+
+def render_html(state: dict, generated_date) -> str:
+    date_str = generated_date.strftime("%Y년 %m월 %d일")
+    weekday_kr = ["월", "화", "수", "목", "금", "토", "일"][generated_date.weekday()]
+
+    morning_panel, morning_modal = _render_morning_panel(state.get("morning"))
+    lunch_panel = _render_lunch_panel(state.get("lunch"))
+    close_panel = _placeholder_panel("close", "시장마감 브리핑은 아직 준비 중입니다.")
 
     return f"""<!DOCTYPE html>
 <html lang="ko">
@@ -162,12 +242,12 @@ def render_html(briefing, generated_date) -> str:
   .tab-panel.active {{
     display: block;
   }}
-  .placeholder-card {{
+  .panel-content {{
     max-width: 720px;
     margin: 24px auto 0;
     padding: 0 16px;
   }}
-  .placeholder-card .card {{
+  .placeholder-msg {{
     text-align: center;
     color: var(--sub);
     padding: 48px 22px;
@@ -371,57 +451,14 @@ def render_html(briefing, generated_date) -> str:
       </div>
     </div>
   </div>
-
-  <div class="tab-panel active" id="panel-morning">
-    <div class="hero">
-      <div class="hero-inner">
-        {_sentiment_badge(briefing.sentiment)}
-        <div class="hero-headline">{_escape(briefing.headline)}</div>
-        <div class="stats">
-          {stats_html}
-        </div>
-      </div>
-    </div>
-
-    <div class="summary-btn-wrap">
-      <button class="summary-btn" onclick="document.getElementById('summaryModal').classList.add('open')">브리핑 요약하기</button>
-    </div>
-
-    <main>
-      {sections_html}
-    </main>
-  </div>
-
-  <div class="tab-panel" id="panel-lunch">
-    <div class="placeholder-card">
-      <div class="card">점심시간 브리핑은 아직 준비 중입니다.</div>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="panel-close">
-    <div class="placeholder-card">
-      <div class="card">시장마감 브리핑은 아직 준비 중입니다.</div>
-    </div>
-  </div>
+{morning_panel}
+{lunch_panel}
+{close_panel}
 
   <footer>
     이 페이지는 매일 자동으로 수집·생성됩니다. 투자 판단의 참고용이며, 투자 조언이 아닙니다.
   </footer>
-
-  <div class="modal-overlay" id="summaryModal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3>브리핑 요약</h3>
-        <button class="modal-close" onclick="document.getElementById('summaryModal').classList.remove('open')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="chat-text" id="chatSummaryText">{_escape_chat(briefing.chat_summary)}</p>
-      </div>
-      <div class="modal-footer">
-        <button class="copy-btn" id="copyBtn" onclick="copySummary()">누르면 복사됩니다</button>
-      </div>
-    </div>
-  </div>
+{morning_modal}
 
   <script>
     function switchTab(name) {{
@@ -430,9 +467,9 @@ def render_html(briefing, generated_date) -> str:
         document.getElementById('tabbtn-' + n).classList.toggle('active', n === name);
       }});
     }}
-    function copySummary() {{
-      var text = document.getElementById('chatSummaryText').innerText;
-      var btn = document.getElementById('copyBtn');
+    function copyText(elementId) {{
+      var text = document.getElementById(elementId).innerText;
+      var btn = document.getElementById('copyBtn-' + elementId);
       function showCopied() {{
         btn.textContent = '복사됐습니다!';
         btn.classList.add('copied');
@@ -453,9 +490,12 @@ def render_html(briefing, generated_date) -> str:
         showCopied();
       }}
     }}
-    document.getElementById('summaryModal').addEventListener('click', function(e) {{
-      if (e.target === this) this.classList.remove('open');
-    }});
+    var modalEl = document.getElementById('summaryModal');
+    if (modalEl) {{
+      modalEl.addEventListener('click', function(e) {{
+        if (e.target === this) this.classList.remove('open');
+      }});
+    }}
   </script>
 </body>
 </html>

@@ -9,6 +9,7 @@ from scraper.schedule_helper import is_run_day, get_lookback_days
 from scraper.naver_finance import get_us_market_headlines, get_article_text
 from ai.summarizer import generate_briefing
 from render import render_html
+from state import load_state, save_state
 
 
 async def main():
@@ -40,7 +41,11 @@ async def main():
     print("\nAI 분석 중...")
     briefing = await generate_briefing(articles)
 
-    html = render_html(briefing, today)
+    state = load_state(today)
+    state["morning"] = briefing.model_dump()
+    save_state(state)
+
+    html = render_html(state, today)
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 

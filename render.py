@@ -4,10 +4,14 @@ import re
 from ai.sections import SECTIONS
 
 
+# 문장 종결 어미: "-습니다.", "-입니다.", "-이죠.", "-했죠." 등
+_SENTENCE_END = r"(?:다|죠)\."
+
+
 def _escape(text: str) -> str:
-    # 문장이 "-습니다.", "-입니다." 등으로 끝날 때마다 줄바꿈을 넣어
-    # 한 문단이 길게 이어붙는 대신 문장 단위로 읽기 편하게 만든다.
-    text = re.sub(r"(다\.)(\s+)", r"\1\n", text)
+    # 문장이 위 종결 어미로 끝날 때마다 줄바꿈을 넣어, 한 문단이 길게
+    # 이어붙는 대신 문장 단위로 읽기 편하게 만든다.
+    text = re.sub(rf"({_SENTENCE_END})(\s+)", r"\1\n", text)
     return html_lib.escape(text).replace("\n", "<br>")
 
 
@@ -15,7 +19,7 @@ def _escape_chat(text: str) -> str:
     # chat_summary는 AI가 이미 문단 사이에 빈 줄(\n\n)을 넣어서 보내주므로,
     # 그 빈 줄은 그대로 두고 문단 "안"의 문장 사이에만 줄바꿈을 추가한다.
     # (다음 글자가 공백이 아닌 경우 = 아직 같은 문단이 이어지는 경우만 매치)
-    text = re.sub(r"(다\.) (?=\S)", r"\1\n", text)
+    text = re.sub(rf"({_SENTENCE_END}) (?=\S)", r"\1\n", text)
     return html_lib.escape(text)
 
 

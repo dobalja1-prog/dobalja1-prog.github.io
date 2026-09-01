@@ -82,8 +82,6 @@ def _render_morning_panel(morning: dict | None) -> tuple[str, str]:
   <div class="tab-panel active" id="panel-morning">
     <div class="hero">
       <div class="hero-inner">
-        {_sentiment_badge(briefing.sentiment)}
-        <div class="hero-headline">{_escape(briefing.headline)}</div>
         <div class="stats">
           {stats_html}
         </div>

@@ -5,9 +5,36 @@ def _escape(text: str) -> str:
     return html_lib.escape(text).replace("\n", "<br>")
 
 
+def _change_color(change: str) -> str:
+    # 국내 증시 관례: 상승=빨강, 하락=파랑
+    if change.strip().startswith("-"):
+        return "var(--down)"
+    if change.strip().startswith("+"):
+        return "var(--up)"
+    return "var(--sub)"
+
+
+def _sentiment_badge(sentiment: str) -> str:
+    color = {
+        "상승": "var(--up)",
+        "하락": "var(--down)",
+    }.get(sentiment, "var(--sub)")
+    return f'<span class="badge" style="background:{color}">{_escape(sentiment)}</span>'
+
+
 def render_html(briefing, generated_date) -> str:
     date_str = generated_date.strftime("%Y년 %m월 %d일")
     weekday_kr = ["월", "화", "수", "목", "금", "토", "일"][generated_date.weekday()]
+
+    stats_html = "\n".join(
+        f"""
+        <div class="stat">
+          <div class="stat-label">{_escape(s.label)}</div>
+          <div class="stat-value">{_escape(s.value)}</div>
+          <div class="stat-change" style="color:{_change_color(s.change)}">{_escape(s.change)}</div>
+        </div>"""
+        for s in briefing.key_stats
+    )
 
     sections_html = "\n".join(
         f"""
@@ -26,41 +53,109 @@ def render_html(briefing, generated_date) -> str:
 <title>오늘의 시황 브리핑</title>
 <style>
   :root {{
-    --bg: #f5f6f8;
+    --bg: #f2f4f7;
     --card-bg: #ffffff;
-    --text: #1a1c1e;
+    --text: #16181d;
     --sub: #6b7280;
     --accent: #2563eb;
     --border: #e5e7eb;
+    --up: #d64545;
+    --down: #2f6fed;
+    --hero-bg-from: #14172b;
+    --hero-bg-to: #262b4a;
   }}
   * {{ box-sizing: border-box; }}
   body {{
     margin: 0;
-    padding: 32px 16px 64px;
+    padding: 0 0 64px;
     background: var(--bg);
     color: var(--text);
     font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     line-height: 1.65;
   }}
-  header {{
-    max-width: 720px;
-    margin: 0 auto 24px;
+  .topbar {{
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
   }}
-  header h1 {{
-    font-size: 1.6rem;
-    margin: 0 0 4px;
-  }}
-  header p {{
-    color: var(--sub);
-    margin: 0;
-    font-size: 0.95rem;
-  }}
-  main {{
+  .topbar-inner {{
     max-width: 720px;
     margin: 0 auto;
     display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }}
+  .topbar-inner .dot {{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }}
+  .hero {{
+    background: linear-gradient(135deg, var(--hero-bg-from), var(--hero-bg-to));
+    color: #fff;
+    padding: 32px 16px 28px;
+  }}
+  .hero-inner {{
+    max-width: 720px;
+    margin: 0 auto;
+  }}
+  .hero-date {{
+    color: #a7adc7;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+  }}
+  .hero-headline {{
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.5;
+    margin: 0 0 16px;
+  }}
+  .badge {{
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 14px;
+  }}
+  .stats {{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 10px;
+    margin-top: 4px;
+  }}
+  .stat {{
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }}
+  .stat-label {{
+    font-size: 0.75rem;
+    color: #a7adc7;
+    margin-bottom: 4px;
+  }}
+  .stat-value {{
+    font-size: 0.95rem;
+    font-weight: 700;
+  }}
+  .stat-change {{
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 2px;
+  }}
+  main {{
+    max-width: 720px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+    display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
   }}
   .card {{
     background: var(--card-bg);
@@ -95,6 +190,7 @@ def render_html(briefing, generated_date) -> str:
   footer {{
     max-width: 720px;
     margin: 32px auto 0;
+    padding: 0 16px;
     color: var(--sub);
     font-size: 0.8rem;
     text-align: center;
@@ -102,10 +198,21 @@ def render_html(briefing, generated_date) -> str:
 </style>
 </head>
 <body>
-  <header>
-    <h1>오늘의 시황 브리핑</h1>
-    <p>{date_str} ({weekday_kr}) · 개장 전 요약</p>
-  </header>
+  <div class="topbar">
+    <div class="topbar-inner"><span class="dot"></span>모닝 마켓 데스크</div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-date">{date_str} ({weekday_kr}) · 개장 전 브리핑</div>
+      {_sentiment_badge(briefing.sentiment)}
+      <div class="hero-headline">{_escape(briefing.headline)}</div>
+      <div class="stats">
+        {stats_html}
+      </div>
+    </div>
+  </div>
+
   <main>
     {sections_html}
   </main>

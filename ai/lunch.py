@@ -72,7 +72,8 @@ def _format_snapshot(snapshot: dict) -> str:
         s = snapshot[key]
         lines.append(
             f"[{label}] 현재가 {s['current']} ({s['change_direction']} {s['change']}, "
-            f"{s['change_pct']}%) / 상승 {s['rise_count']}개 하락 {s['fall_count']}개 "
+            f"{s['change_pct']}%) / 시가 {s['open']} 고가 {s['high']} 저가 {s['low']} / "
+            f"상승 {s['rise_count']}개 하락 {s['fall_count']}개 "
             f"보합 {s['steady_count']}개 (상한 {s['upper_limit_count']} 하한 {s['lower_limit_count']}) / "
             f"외국인 순매수 {s['foreign_net']}백만원, 기관 순매수 {s['institution_net']}백만원, "
             f"개인 순매수 {s['personal_net']}백만원"
@@ -120,9 +121,10 @@ def _build_prompt(snapshot: dict) -> str:
 개수 등)로 스스로 판단해서 분량을 다르게 쓰세요. 아래 예시들은 "이슈가
 많고 변동성이 큰 날" 기준 분량이니, 그보다 짧게 써야 하는 날이 많을
 겁니다.
-- 평온한 날 (등락폭 작고 ADR도 크게 안 쏠림): 3~4문단 정도로 짧게
-- 평범한 날: 5~6문단 정도
-- 등락폭이 크거나 이슈가 많은 날: 7~8문단 정도 (예시 수준)
+- 특별한 이슈 없이 등락폭도 거의 없는 날 (등락률 ±1% 미만이고 장중
+  변동폭도 작음): 3~4문단 정도로 짧게
+- 평범한 날 (등락률 대략 ±1~1.5% 내외): 5~6문단 정도
+- 등락폭이 크거나(대략 ±1.5% 초과) 이슈가 많은 날: 7~8문단 정도 (예시 수준)
 
 [시장 분위기에 따른 톤]
 - 지수가 꽤 하락한 날에는 사실 전달만 하지 말고, 참여자들을 다독이거나

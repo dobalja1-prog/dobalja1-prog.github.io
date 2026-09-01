@@ -312,7 +312,7 @@ def render_html(briefing, generated_date) -> str:
 </head>
 <body>
   <div class="topbar">
-    <div class="topbar-inner"><span class="dot"></span>모닝 마켓 데스크</div>
+    <div class="topbar-inner"><span class="dot"></span>주식 시장 브리핑</div>
   </div>
 
   <div class="hero">

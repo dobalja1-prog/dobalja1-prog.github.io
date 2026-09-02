@@ -2,7 +2,7 @@ import json
 import os
 
 HISTORY_PATH = "data/history.json"
-MAX_ENTRIES = 3  # 각 브리핑 종류별로 최근 며칠치만 보관
+MAX_ENTRIES = 5  # 각 브리핑 종류별로 최근 며칠치만 보관 (거래일 기준 약 1주일)
 
 
 def _load_all() -> dict:

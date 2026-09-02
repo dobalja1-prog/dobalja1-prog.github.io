@@ -75,8 +75,8 @@ def _format_snapshot(snapshot: dict) -> str:
             f"{s['change_pct']}%) / 시가 {s['open']} 고가 {s['high']} 저가 {s['low']} / "
             f"상승 {s['rise_count']}개 하락 {s['fall_count']}개 "
             f"보합 {s['steady_count']}개 (상한 {s['upper_limit_count']} 하한 {s['lower_limit_count']}) / "
-            f"외국인 순매수 {s['foreign_net']}백만원, 기관 순매수 {s['institution_net']}백만원, "
-            f"개인 순매수 {s['personal_net']}백만원"
+            f"외국인 순매수 {s['foreign_net']}억원, 기관 순매수 {s['institution_net']}억원, "
+            f"개인 순매수 {s['personal_net']}억원"
         )
     return "\n".join(lines)
 
@@ -104,6 +104,10 @@ def _build_prompt(snapshot: dict) -> str:
   순매수)를 근거로, 본인의 확신에 찬 해석을 자신 있게 섞어서 쓰세요.
   단순 수치 나열이 아니라 "이게 무엇을 의미하는지"에 대한 트레이더로서의
   견해를 담아야 합니다.
+- 예시에 나온 "지수는 OO인데 왜 내 종목은..?" 같은 표현을 매번 그대로
+  재활용하지 마세요. 오늘 데이터가 실제로 얼마나 심각한지에 맞춰
+  표현의 강도도 같이 조절하세요 — 상승 종목이 하락 종목의 몇 분의
+  1도 안 되는 날은 정말 심각하게, 완만한 날은 그 정도로만 쓰세요.
 - 국내 증시 색깔 관례를 지키세요: 상승은 "빨간불", 하락은 "파란불"
   입니다. 미국식으로 상승을 "초록불"이라고 쓰지 마세요.
 - "VIX"라는 표기는 쓰지 말고 항상 "공포지수"라고만 쓰세요 (괄호 설명

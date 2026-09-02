@@ -126,8 +126,8 @@ def _format_snapshot(snapshot: dict) -> str:
             f"{s['change_pct']}%) / 시가 {s['open']} 고가 {s['high']} 저가 {s['low']} / "
             f"상승 {s['rise_count']}개 하락 {s['fall_count']}개 "
             f"보합 {s['steady_count']}개 (상한 {s['upper_limit_count']} 하한 {s['lower_limit_count']}) / "
-            f"외국인 순매수 {s['foreign_net']}백만원, 기관 순매수 {s['institution_net']}백만원, "
-            f"개인 순매수 {s['personal_net']}백만원"
+            f"외국인 순매수 {s['foreign_net']}억원, 기관 순매수 {s['institution_net']}억원, "
+            f"개인 순매수 {s['personal_net']}억원"
         )
     return "\n".join(lines)
 

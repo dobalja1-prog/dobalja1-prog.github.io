@@ -39,7 +39,7 @@ async def main():
         articles.append({"title": h["title"], "text": text})
 
     print("\nAI 분석 중...")
-    briefing = await generate_briefing(articles)
+    briefing = await generate_briefing(articles, today)
 
     state = load_state(today)
     state["morning"] = briefing.model_dump()

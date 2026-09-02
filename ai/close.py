@@ -140,12 +140,23 @@ def _format_articles(articles: list[dict]) -> str:
     )
 
 
-def _build_prompt(snapshot: dict, articles: list[dict]) -> str:
+WEEKDAY_KR = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
+
+
+def _build_prompt(snapshot: dict, articles: list[dict], today) -> str:
     examples_block = "\n\n=====\n\n".join(STYLE_EXAMPLES)
+    today_str = f"{today.isoformat()} ({WEEKDAY_KR[today.weekday()]})"
 
     return f"""당신은 국내 주식 트레이딩방을 운영하는 개인 트레이더입니다.
 매일 장 마감 무렵(15시 20분경) 참여자들에게 오늘 하루 시장을 정리해주는
 마감 코멘트를 씁니다.
+
+[오늘 날짜]
+{today_str}
+"내일", "이번 주 금요일", "다음 주" 같은 요일·날짜 표현을 쓸 때는
+반드시 이 날짜를 기준으로 정확히 계산하세요. 아래 [문체 예시]에 나온
+특정 요일 언급(예: "내일이 금요일이라")은 그 예시가 쓰였던 날의
+얘기일 뿐이니 오늘 날짜와 무관하면 절대 그대로 베끼지 마세요.
 
 [오늘 마감 무렵 실시간 데이터]
 {_format_snapshot(snapshot)}
@@ -153,9 +164,16 @@ def _build_prompt(snapshot: dict, articles: list[dict]) -> str:
 [오늘 수집된 국내증시 관련 기사]
 {_format_articles(articles)}
 
-[문체 예시 — 톤과 구성만 참고하세요. 예시 속 숫자·상황·과거 비교(3월/5월 등)는
-그날그날 다르므로 절대 그대로 베끼지 말고, 위 데이터와 기사에 맞게 새로 쓰세요.
-근거 없는 과거 특정 시점과의 비교는 만들어내지 마세요]
+[문체 예시 — 정말 "말투"만 참고하세요]
+아래 예시들은 어미, 문장 길이, 감탄사 같은 말투를 배우기 위한 것일 뿐,
+"무슨 얘기를 할지"나 "어떤 논리로 설명할지"를 따라 하라는 게 아닙니다.
+예시 속 특정 이론·설명 방식(예: "외인→기관→개인 순으로 신용을 털어낸다",
+"반대매매가 정리되면 ADR이 개선된다" 같은 특정 프레임)도 절대 그대로
+가져다 쓰지 마세요. 그 예시가 쓰였던 날에 실제로 맞았던 해석일 뿐,
+오늘 데이터가 뒷받침하지 않으면 근거 없는 재활용입니다. 오늘 분석의
+논리와 내용은 위에 주어진 오늘 데이터와 기사만 보고 처음부터 직접
+구성하세요. 예시 속 숫자·요일·과거 비교(3월/5월 등)도 그날그날 다르니
+절대 그대로 베끼지 마세요.
 
 {examples_block}
 
@@ -222,8 +240,11 @@ def _build_prompt(snapshot: dict, articles: list[dict]) -> str:
 - "OO종목 익절/편입/매도" 같은 구체적인 매매 내역이나 보유 종목 언급은
   실제 계좌 정보가 없으므로 절대 지어내지 말고 넣지 마세요.
 - 코스피와 코스닥을 따로따로 문단을 나눠 딱딱하게 설명하지 마세요.
-  "코스피는 ~한 반면 코스닥은 ~했는데," 처럼 두 지수를 자연스럽게
-  비교하며 하나의 흐름 안에서 엮어서 서술하세요.
+  다만 "코스피는 ~한 반면 코스닥은 ~했는데" 라는 문장 패턴을 매번
+  고정적으로 쓰지도 마세요 — 이것도 반복되면 또 하나의 상투적인
+  틀이 됩니다. 오늘 더 중요한 이야기가 있는 지수 위주로 자연스럽게
+  풀어가고, 다른 지수는 필요할 때만 짧게 곁들이는 식으로 매번 다르게
+  구성하세요. 두 지수를 항상 나란히 비교할 필요는 없습니다.
 - 지수가 하락 마감했다면 참여자를 다독이는 위로/격려 멘트를, 상승
   마감했다면 긍정적이고 힘을 주는 멘트를 자연스럽게 섞으세요. 혼조/보합이면
   담담하게 쓰세요.
@@ -250,6 +271,6 @@ def _build_prompt(snapshot: dict, articles: list[dict]) -> str:
 """
 
 
-async def generate_close_briefing(snapshot: dict, articles: list[dict]) -> CloseBriefing:
-    prompt = _build_prompt(snapshot, articles)
+async def generate_close_briefing(snapshot: dict, articles: list[dict], today) -> CloseBriefing:
+    prompt = _build_prompt(snapshot, articles, today)
     return await ask_structured(prompt, CloseBriefing)

@@ -55,7 +55,10 @@ STYLE_EXAMPLES = [
 ]
 
 
-def _build_prompt(articles: list[dict]) -> str:
+WEEKDAY_KR = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
+
+
+def _build_prompt(articles: list[dict], today) -> str:
     article_block = "\n\n".join(
         f"[기사 {i+1}] {a['title']}\n{a['text']}"
         for i, a in enumerate(articles)
@@ -67,9 +70,16 @@ def _build_prompt(articles: list[dict]) -> str:
         f"{i+1}. {s['title']} — {s['instruction']}" for i, s in enumerate(SECTIONS)
     )
 
+    today_str = f"{today.isoformat()} ({WEEKDAY_KR[today.weekday()]})"
+
     return f"""당신은 국내 증권사의 리서치 담당자입니다.
 아래는 오늘 아침 수집된 관련 기사 원문들입니다. 이 기사들을 바탕으로
 국내증시 개장 전 시황 브리핑을 본인이 직접 작성하는 것처럼 쓰세요.
+
+[오늘 날짜]
+{today_str}
+"오늘", "이번 주", 요일 표현을 쓸 때는 반드시 이 날짜를 기준으로
+정확히 계산하세요. 예시 속 요일·날짜 언급은 그대로 베끼지 마세요.
 
 [중요 - 문체]
 - "연합인포맥스", "로이터", "AP", "블룸버그", "OO통신", "OO에 따르면" 같은
@@ -162,8 +172,13 @@ def _build_prompt(articles: list[dict]) -> str:
     앞 문단에서 다뤘으니 여기서 또 늘어놓지 마세요.
   - 앞의 [중요 - 문체] 규칙을 여기서도 동일하게 지키세요.
 
-[문체 예시 — 톤과 구성만 참고하세요. 예시 속 숫자는 그날그날 다르니
-절대 그대로 베끼지 말고 오늘 기사 내용에 맞게 새로 쓰세요]
+[문체 예시 — 정말 "말투"만 참고하세요]
+아래 예시들은 어미, 문장 길이 같은 말투를 배우기 위한 것일 뿐, "무슨
+얘기를 할지"나 "어떤 논리로 설명할지"를 따라 하라는 게 아닙니다.
+예시 속 특정 판단·수치·요일 언급도 절대 그대로 가져다 쓰지 마세요.
+그 예시가 쓰였던 날에 실제로 맞았던 내용일 뿐, 오늘 기사가 뒷받침하지
+않으면 근거 없는 재활용입니다. 오늘 분석의 논리와 내용은 위에 주어진
+오늘 기사만 보고 처음부터 직접 구성하세요.
 {examples_block}
 
 [작성할 항목]
@@ -174,6 +189,6 @@ def _build_prompt(articles: list[dict]) -> str:
 """
 
 
-async def generate_briefing(articles: list[dict]) -> MarketBriefing:
-    prompt = _build_prompt(articles)
+async def generate_briefing(articles: list[dict], today) -> MarketBriefing:
+    prompt = _build_prompt(articles, today)
     return await ask_structured(prompt, MarketBriefing)

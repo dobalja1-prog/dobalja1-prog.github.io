@@ -28,7 +28,7 @@ async def main():
     print(snapshot)
 
     print("\nAI 분석 중...")
-    lunch = await generate_lunch_briefing(snapshot)
+    lunch = await generate_lunch_briefing(snapshot, today)
 
     state = load_state(today)
     state["lunch"] = lunch.model_dump()

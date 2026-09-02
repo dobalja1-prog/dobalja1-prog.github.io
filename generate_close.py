@@ -36,7 +36,7 @@ async def main():
         articles.append({"title": h["title"], "text": text})
 
     print("\nAI 분석 중...")
-    close = await generate_close_briefing(snapshot, articles)
+    close = await generate_close_briefing(snapshot, articles, today)
 
     state = load_state(today)
     state["close"] = close.model_dump()

@@ -81,18 +81,37 @@ def _format_snapshot(snapshot: dict) -> str:
     return "\n".join(lines)
 
 
-def _build_prompt(snapshot: dict) -> str:
+WEEKDAY_KR = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
+
+
+def _build_prompt(snapshot: dict, today) -> str:
     examples_block = "\n\n=====\n\n".join(STYLE_EXAMPLES)
+    today_str = f"{today.isoformat()} ({WEEKDAY_KR[today.weekday()]})"
 
     return f"""당신은 국내 주식 트레이딩방을 운영하는 개인 트레이더입니다.
 매일 오전장이 끝나갈 무렵(11시 10분경) 참여자들에게 오전장을 정리해주는
 점심시간 코멘트를 씁니다.
 
+[오늘 날짜]
+{today_str}
+"오늘", "이번 주", 요일 표현을 쓸 때는 반드시 이 날짜를 기준으로
+정확히 계산하세요. 예시 속 요일 언급(예: "월요일부터 시장 참
+까다롭긴하네요")은 그 예시가 쓰였던 날의 얘기일 뿐이니 오늘과
+무관하면 절대 그대로 베끼지 마세요.
+
 [오늘 오전장 실시간 데이터]
 {_format_snapshot(snapshot)}
 
-[문체 예시 — 톤과 구성만 참고하세요. 예시 속 숫자·상황은 그날그날 다르므로
-절대 그대로 베끼지 말고, 위에 주어진 오늘 데이터에 맞게 새로 쓰세요]
+[문체 예시 — 정말 "말투"만 참고하세요]
+아래 예시들은 어미, 문장 길이, 감탄사 같은 말투를 배우기 위한 것일
+뿐, "무슨 얘기를 할지"나 "어떤 논리로 설명할지"를 따라 하라는 게
+아닙니다. 예시 속 특정 이론·설명 방식(예: "시장 싸이클은 상승-정체-
+조정-하락-정체-반등을 반복한다", "수급 규모 3가지 관점" 같은 특정
+프레임)도 절대 그대로 가져다 쓰지 마세요. 그 예시가 쓰였던 날에
+실제로 맞았던 해석일 뿐, 오늘 데이터가 뒷받침하지 않으면 근거 없는
+재활용입니다. 오늘 분석의 논리와 내용은 위에 주어진 오늘 데이터만
+보고 처음부터 직접 구성하세요. 예시 속 숫자·요일도 그날그날 다르니
+절대 그대로 베끼지 마세요.
 
 {examples_block}
 
@@ -159,8 +178,11 @@ def _build_prompt(snapshot: dict) -> str:
 - "OO종목 익절/편입/매도" 같은 구체적인 매매 내역이나 보유 종목 언급은
   실제 계좌 정보가 없으므로 절대 지어내지 말고 넣지 마세요.
 - 코스피와 코스닥을 따로따로 문단을 나눠 딱딱하게 설명하지 마세요.
-  "코스피는 ~한 반면 코스닥은 ~했는데," 처럼 두 지수를 자연스럽게
-  비교하며 하나의 흐름 안에서 엮어서 서술하세요.
+  다만 "코스피는 ~한 반면 코스닥은 ~했는데" 라는 문장 패턴을 매번
+  고정적으로 쓰지도 마세요 — 이것도 반복되면 또 하나의 상투적인
+  틀이 됩니다. 오늘 더 중요한 이야기가 있는 지수 위주로 자연스럽게
+  풀어가고, 다른 지수는 필요할 때만 짧게 곁들이는 식으로 매번 다르게
+  구성하세요. 두 지수를 항상 나란히 비교할 필요는 없습니다.
 - 마지막은 "맛점하세요!", "식사들 챙기시고 오후에 뵙겠습니다!" 류의
   점심 인사로 마무리하세요.
 - 문단 사이는 한 줄씩 띄우세요. 항목을 번호로 나누지 말고 하나의
@@ -194,6 +216,6 @@ def _build_prompt(snapshot: dict) -> str:
 """
 
 
-async def generate_lunch_briefing(snapshot: dict) -> LunchBriefing:
-    prompt = _build_prompt(snapshot)
+async def generate_lunch_briefing(snapshot: dict, today) -> LunchBriefing:
+    prompt = _build_prompt(snapshot, today)
     return await ask_structured(prompt, LunchBriefing)

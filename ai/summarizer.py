@@ -58,7 +58,19 @@ STYLE_EXAMPLES = [
 WEEKDAY_KR = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
 
 
-def _build_prompt(articles: list[dict], today) -> str:
+def _format_history(recent_history: list[dict]) -> str:
+    if not recent_history:
+        return "(최근 기록 없음 — 참고할 과거 브리핑이 아직 없습니다)"
+    parts = []
+    for entry in recent_history:
+        text = entry["text"]
+        if len(text) > 1000:
+            text = text[:1000] + "...(생략)"
+        parts.append(f"[{entry['date']}]\n{text}")
+    return "\n\n".join(parts)
+
+
+def _build_prompt(articles: list[dict], today, recent_history: list[dict]) -> str:
     article_block = "\n\n".join(
         f"[기사 {i+1}] {a['title']}\n{a['text']}"
         for i, a in enumerate(articles)
@@ -80,6 +92,17 @@ def _build_prompt(articles: list[dict], today) -> str:
 {today_str}
 "오늘", "이번 주", 요일 표현을 쓸 때는 반드시 이 날짜를 기준으로
 정확히 계산하세요. 예시 속 요일·날짜 언급은 그대로 베끼지 마세요.
+
+[최근 며칠간 실제로 내보낸 chat_summary — 연속성 참고용]
+{_format_history(recent_history)}
+
+위는 최근에 실제로 작성했던 chat_summary입니다. 오늘도 같은 종목·
+이슈가 다시 등장하면 "어제 말씀드린대로", "얼마 전에 말씀드린대로"
+처럼 이미 다뤘던 얘기라는 걸 자연스럽게 티 내면서 이어가세요(이
+규칙은 chat_summary를 쓸 때만 적용하세요). 마치 처음 얘기하는
+것처럼 위 기록과 똑같은 문장을 반복하지 마세요. 다만 위에 최근
+기록이 없거나 오늘 얘기가 정말 새로운 내용이면 억지로 적용하지
+마세요.
 
 [중요 - 문체]
 - "연합인포맥스", "로이터", "AP", "블룸버그", "OO통신", "OO에 따르면" 같은
@@ -195,6 +218,6 @@ def _build_prompt(articles: list[dict], today) -> str:
 """
 
 
-async def generate_briefing(articles: list[dict], today) -> MarketBriefing:
-    prompt = _build_prompt(articles, today)
+async def generate_briefing(articles: list[dict], today, recent_history: list[dict]) -> MarketBriefing:
+    prompt = _build_prompt(articles, today, recent_history)
     return await ask_structured(prompt, MarketBriefing)

@@ -10,6 +10,7 @@ from scraper.market_snapshot import get_market_snapshot
 from ai.lunch import generate_lunch_briefing
 from render import render_html
 from state import load_state, save_state
+from history import get_recent, add_entry
 
 
 async def main():
@@ -27,12 +28,15 @@ async def main():
     snapshot = get_market_snapshot()
     print(snapshot)
 
+    recent_history = get_recent("lunch", today.isoformat())
+
     print("\nAI 분석 중...")
-    lunch = await generate_lunch_briefing(snapshot, today)
+    lunch = await generate_lunch_briefing(snapshot, today, recent_history)
 
     state = load_state(today)
     state["lunch"] = lunch.model_dump()
     save_state(state)
+    add_entry("lunch", today.isoformat(), lunch.text)
 
     html = render_html(state, today)
     with open("index.html", "w", encoding="utf-8") as f:

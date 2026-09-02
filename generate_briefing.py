@@ -10,6 +10,7 @@ from scraper.naver_finance import get_us_market_headlines, get_article_text
 from ai.summarizer import generate_briefing
 from render import render_html
 from state import load_state, save_state
+from history import get_recent, add_entry
 
 
 async def main():
@@ -38,12 +39,15 @@ async def main():
         text = get_article_text(h["link"])
         articles.append({"title": h["title"], "text": text})
 
+    recent_history = get_recent("morning", today.isoformat())
+
     print("\nAI 분석 중...")
-    briefing = await generate_briefing(articles, today)
+    briefing = await generate_briefing(articles, today, recent_history)
 
     state = load_state(today)
     state["morning"] = briefing.model_dump()
     save_state(state)
+    add_entry("morning", today.isoformat(), briefing.chat_summary)
 
     html = render_html(state, today)
     with open("index.html", "w", encoding="utf-8") as f:

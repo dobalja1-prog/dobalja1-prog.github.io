@@ -11,6 +11,7 @@ from scraper.naver_finance import get_domestic_close_headlines, get_article_text
 from ai.close import generate_close_briefing
 from render import render_html
 from state import load_state, save_state
+from history import get_recent, add_entry
 
 
 async def main():
@@ -35,12 +36,15 @@ async def main():
         text = get_article_text(h["link"])
         articles.append({"title": h["title"], "text": text})
 
+    recent_history = get_recent("close", today.isoformat())
+
     print("\nAI 분석 중...")
-    close = await generate_close_briefing(snapshot, articles, today)
+    close = await generate_close_briefing(snapshot, articles, today, recent_history)
 
     state = load_state(today)
     state["close"] = close.model_dump()
     save_state(state)
+    add_entry("close", today.isoformat(), close.text)
 
     html = render_html(state, today)
     with open("index.html", "w", encoding="utf-8") as f:

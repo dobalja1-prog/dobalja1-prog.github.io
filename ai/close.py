@@ -143,7 +143,19 @@ def _format_articles(articles: list[dict]) -> str:
 WEEKDAY_KR = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
 
 
-def _build_prompt(snapshot: dict, articles: list[dict], today) -> str:
+def _format_history(recent_history: list[dict]) -> str:
+    if not recent_history:
+        return "(최근 기록 없음 — 참고할 과거 브리핑이 아직 없습니다)"
+    parts = []
+    for entry in recent_history:
+        text = entry["text"]
+        if len(text) > 1000:
+            text = text[:1000] + "...(생략)"
+        parts.append(f"[{entry['date']}]\n{text}")
+    return "\n\n".join(parts)
+
+
+def _build_prompt(snapshot: dict, articles: list[dict], today, recent_history: list[dict]) -> str:
     examples_block = "\n\n=====\n\n".join(STYLE_EXAMPLES)
     today_str = f"{today.isoformat()} ({WEEKDAY_KR[today.weekday()]})"
 
@@ -157,6 +169,17 @@ def _build_prompt(snapshot: dict, articles: list[dict], today) -> str:
 반드시 이 날짜를 기준으로 정확히 계산하세요. 아래 [문체 예시]에 나온
 특정 요일 언급(예: "내일이 금요일이라")은 그 예시가 쓰였던 날의
 얘기일 뿐이니 오늘 날짜와 무관하면 절대 그대로 베끼지 마세요.
+
+[최근 며칠간 실제로 내보낸 브리핑 — 연속성 참고용]
+{_format_history(recent_history)}
+
+위는 최근에 실제로 작성했던 브리핑입니다. 오늘도 같은 종목·이슈가
+다시 등장하면(예: 어제도 언급한 기업 실적 얘기가 오늘도 나오는 경우)
+"어제 말씀드린대로", "얼마 전에 말씀드린대로", "예전에 말씀드린대로"
+처럼 이미 다뤘던 얘기라는 걸 자연스럽게 티 내면서 이어가세요. 마치
+처음 얘기하는 것처럼 위 기록과 똑같은 문장을 반복하지 마세요. 다만
+위에 최근 기록이 없거나 오늘 얘기가 정말 새로운 내용이면 이 규칙을
+억지로 적용하지 마세요.
 
 [오늘 마감 무렵 실시간 데이터]
 {_format_snapshot(snapshot)}
@@ -274,6 +297,8 @@ def _build_prompt(snapshot: dict, articles: list[dict], today) -> str:
 """
 
 
-async def generate_close_briefing(snapshot: dict, articles: list[dict], today) -> CloseBriefing:
-    prompt = _build_prompt(snapshot, articles, today)
+async def generate_close_briefing(
+    snapshot: dict, articles: list[dict], today, recent_history: list[dict]
+) -> CloseBriefing:
+    prompt = _build_prompt(snapshot, articles, today, recent_history)
     return await ask_structured(prompt, CloseBriefing)

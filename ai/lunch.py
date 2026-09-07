@@ -1,8 +1,5 @@
 from pydantic import BaseModel
 
-from ai.client import ask_structured
-
-
 class LunchBriefing(BaseModel):
     text: str  # 항목 구분 없이 하나로 이어지는 점심시간 코멘트 전체
 
@@ -10,6 +7,17 @@ class LunchBriefing(BaseModel):
 # 실제로 쓰던 점심 멘트 중, 톤/구성이 서로 다른 것들을 골라 문체 예시로 사용.
 # 그날그날 실제 데이터로 새로 써야 하므로 예시 속 숫자는 절대 베끼면 안 된다.
 STYLE_EXAMPLES = [
+    '''오전장은 금요일 미장 오픈AI발 반도체 강세와 젠슨 황의 AGI 관련 발언으로 인해 반도체 대표주 중심의 강세가 나왔네요.
+
+거기에 전력·에너지 측면도 동반 강세인 점은 AI 데이터센터발 전력 인프라 수요 기대가 부수적으로 반영된 것으로 보입니다.
+
+금일도 외인·기관 수급이 코스피 중심으로 강하게 잡히고 있지만 지수 상승폭에 비해 개별 종목 실속이 크지 않은 만큼 반도체나 전력 인프라 테마 내 선별 대응이 무난해 보이고,
+
+일정들을 소화하면서 다시 증시가 상승세를 보이기 시작하면 반도체뿐만 아니라 주도 섹터·테마 내에 골고루 수급이 돌며 순차적 상승이 나와줄 것이라 예상되네요.
+
+오전장은 연료전지 테마주 1종목 편입하고 마무리하겠습니다.
+
+식사 맛있게 하세요!''',
     '''오전장 여기까지만 보겠습니다.
 
 하방은 거듭 잡히고 있지만 특별한 뉴스도 없고 시장 전반적으로 한산하네요.
@@ -266,5 +274,8 @@ def _build_prompt(snapshot: dict, today, recent_history: list[dict]) -> str:
 
 
 async def generate_lunch_briefing(snapshot: dict, today, recent_history: list[dict]) -> LunchBriefing:
+    # 페이지 렌더링만 할 때는 Claude SDK가 필요하지 않도록 지연 import한다.
+    from ai.client import ask_structured
+
     prompt = _build_prompt(snapshot, today, recent_history)
     return await ask_structured(prompt, LunchBriefing)

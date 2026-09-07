@@ -1,8 +1,5 @@
 from pydantic import BaseModel
 
-from ai.client import ask_structured
-
-
 class CloseBriefing(BaseModel):
     text: str  # 항목 구분 없이 하나로 이어지는 시장마감 코멘트 전체
 
@@ -330,5 +327,8 @@ def _build_prompt(snapshot: dict, articles: list[dict], today, recent_history: l
 async def generate_close_briefing(
     snapshot: dict, articles: list[dict], today, recent_history: list[dict]
 ) -> CloseBriefing:
+    # 페이지 렌더링만 할 때는 Claude SDK가 필요하지 않도록 지연 import한다.
+    from ai.client import ask_structured
+
     prompt = _build_prompt(snapshot, articles, today, recent_history)
     return await ask_structured(prompt, CloseBriefing)

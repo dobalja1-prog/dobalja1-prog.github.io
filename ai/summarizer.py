@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-from ai.client import ask_structured
 from ai.sections import SECTIONS
 
 
@@ -289,5 +288,8 @@ def _build_prompt(articles: list[dict], today, recent_history: list[dict]) -> st
 
 
 async def generate_briefing(articles: list[dict], today, recent_history: list[dict]) -> MarketBriefing:
+    # 페이지 렌더링만 할 때는 Claude SDK가 필요하지 않도록 지연 import한다.
+    from ai.client import ask_structured
+
     prompt = _build_prompt(articles, today, recent_history)
     return await ask_structured(prompt, MarketBriefing)

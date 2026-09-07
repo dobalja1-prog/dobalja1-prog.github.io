@@ -39,7 +39,20 @@ def get_headline_list(pages=1, section_id2=SECTION_OVERSEAS):
             article_id, office_id = ids.group(1), ids.group(2)
             link = f"https://n.news.naver.com/mnews/article/{office_id}/{article_id}"
             results.append({"title": title, "link": link})
-    return results
+    return _dedupe_headlines(results)
+
+
+def _dedupe_headlines(headlines):
+    """제목이 완전히 같은 기사(다른 페이지에 중복 노출되는 경우)를 제거한다."""
+    seen = set()
+    result = []
+    for h in headlines:
+        key = h["title"].strip()
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(h)
+    return result
 
 
 def filter_us_market_news(headlines):
@@ -60,13 +73,25 @@ def get_domestic_close_headlines(pages=5):
 
 def get_article_text(link):
     """네이버 뉴스 기사 본문 텍스트를 가져온다."""
+    return get_article_detail(link)["text"]
+
+
+def get_article_detail(link):
+    """기사 본문과 함께 언론사명, 게재 시각을 가져온다."""
     response = requests.get(link, headers=HEADERS)
     response.encoding = "utf-8"
     soup = BeautifulSoup(response.text, "html.parser")
+
     body = soup.select_one("#dic_area")
-    if not body:
-        return ""
-    return body.get_text(separator="\n", strip=True)
+    text = body.get_text(separator="\n", strip=True) if body else ""
+
+    press_el = soup.select_one(".media_end_head_top_logo img")
+    press = press_el.get("alt") if press_el else None
+
+    time_el = soup.select_one(".media_end_head_info_datestamp_time")
+    time_str = time_el.get("data-date-time") if time_el else None
+
+    return {"text": text, "press": press, "time": time_str}
 
 
 if __name__ == "__main__":

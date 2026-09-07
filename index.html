@@ -299,7 +299,7 @@
 
   <div class="hero-header">
     <div class="hero-header-inner">
-      <div class="hero-date">2026년 09월 07일 (월)</div>
+      <div class="hero-date">2026년 09월 08일 (화)</div>
       <div class="tabbar">
         <button class="tab-btn active" id="tabbtn-morning" onclick="switchTab('morning')">개장 전 브리핑</button>
         <button class="tab-btn" id="tabbtn-lunch" onclick="switchTab('lunch')">점심시간</button>
@@ -309,9 +309,79 @@
   </div>
 
   <div class="tab-panel active" id="panel-morning">
-    <div class="panel-content">
-      <div class="card placeholder-msg">업데이트 준비중입니다</div>
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="stats">
+          
+        <div class="stat">
+          <div class="stat-label">다우존스</div>
+          <div class="stat-value">53,414.25</div>
+          <div class="stat-change" style="color:var(--down)">-0.51%</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">나스닥종합</div>
+          <div class="stat-value">26,506.99</div>
+          <div class="stat-change" style="color:var(--down)">-0.29%</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">S&amp;P500</div>
+          <div class="stat-value">7,718.60</div>
+          <div class="stat-change" style="color:var(--down)">-0.38%</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">필라델피아반도체</div>
+          <div class="stat-value">11,735.26</div>
+          <div class="stat-change" style="color:var(--up)">+3.38%</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">코스피</div>
+          <div class="stat-value">6,995.39</div>
+          <div class="stat-change" style="color:var(--up)">+4.61%</div>
+        </div>
+        </div>
+      </div>
     </div>
+
+    <div class="summary-btn-wrap">
+      <button class="summary-btn" onclick="document.getElementById('summaryModal').classList.add('open')">브리핑 요약하기</button>
+    </div>
+
+    <main>
+      
+        <section class="card">
+          <h2><span class="num">1</span>간밤 미국 증시 흐름과 마감</h2>
+          <p>간밤 美증시는 다우가 0.51%, S&amp;P500이 0.38%, 나스닥이 0.29% 내리며 소폭 약세로 마감했습니다.<br>반면 필라델피아반도체지수는 3.38% 올라 지수와 업종 흐름이 엇갈렸습니다.<br>공포지수는 15.30으로 5.30% 올랐지만 절대 수준은 낮은 편입니다.</p>
+        </section>
+
+        <section class="card">
+          <h2><span class="num">2</span>증시에 작용한 재료와 주요 이벤트</h2>
+          <p>S&amp;P100 지수 편출입은 전통 소비재보다 기술 기업의 비중이 커지는 흐름을 보여주는 이벤트입니다.<br>나이키는 21일 개장 전 S&amp;P100에서 빠지고, 델 테크놀로지스·샌디스크·팔로알토 네트웍스·아리스타 네트웍스가 새로 편입될 예정입니다.<br>이번 조정만으로 시장 전체 방향을 단정하기보다 업종별 상대 강도를 확인할 필요가 있습니다.</p>
+        </section>
+
+        <section class="card">
+          <h2><span class="num">3</span>크게 우려하지 않아도 될 부분과 우려스러운 부분</h2>
+          <p>주요 지수의 하락폭이 1%를 넘지 않은 점과 반도체지수의 강세는 급격한 위험회피로 보기 어려운 부분입니다.<br>다만 공포지수가 전일보다 올랐고, 美 지수와 반도체 업종이 엇갈린 만큼 업종 전반으로 매수세가 확산됐다고 보기는 이릅니다.<br>오늘은 지수보다 반도체 강세가 국내 시장에서도 이어지는지 살펴봐야겠습니다.</p>
+        </section>
+
+        <section class="card">
+          <h2><span class="num">4</span>특징적인 움직임을 보인 종목과 이슈</h2>
+          <p>나이키는 실적과 주가 부진으로 18년 만에 S&amp;P100에서 제외됩니다.<br>주가는 2021년 고점 대비 약 78% 하락했고, 중국 매출 부진과 경쟁 심화가 부담으로 거론됐습니다.<br>반대로 이번 편입 명단은 기술 기업 중심으로 구성돼 시장의 관심이 어느 쪽에 쏠려 있는지 보여줍니다.</p>
+        </section>
+
+        <section class="card">
+          <h2><span class="num">5</span>국내증시 마감 이후 새벽 사이 주요 이슈</h2>
+          <p>새벽 사이 확인된 주요 이벤트는 S&amp;P100의 정기 편출입 발표입니다.<br>편출입은 21일 美증시 개장 전에 적용될 예정이며, 기술 기업의 지수 내 비중 변화가 주목됩니다.<br>간밤 반도체지수 강세도 국내 관련 업종의 참고 재료가 될 수 있습니다.</p>
+        </section>
+
+        <section class="card">
+          <h2><span class="num">6</span>오늘 국내증시에서 참고할 부분과 예상 흐름</h2>
+          <p>전일 코스피는 4.61% 올라 6,995.39로 마감했고 외국인과 기관이 각각 2조5,532억원, 2조6,491억원을 순매수했습니다.<br>삼성전자와 SK하이닉스가 각각 5.68%, 8.26% 오른 가운데, 오늘은 간밤 반도체지수 강세가 이 흐름을 뒷받침하는지와 전일 큰 폭 상승 뒤 수급이 유지되는지를 함께 보시죠.</p>
+        </section>
+    </main>
   </div>
 
   <div class="tab-panel" id="panel-lunch">
@@ -350,6 +420,34 @@
     이 페이지는 매일 자동으로 수집·생성됩니다. 투자 판단의 참고용이며, 투자 조언이 아닙니다.
   </footer>
 
+  <div class="modal-overlay" id="summaryModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>브리핑 요약</h3>
+        <button class="modal-close" onclick="document.getElementById('summaryModal').classList.remove('open')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="chat-text" id="chatSummaryText">좋은 아침입니다.
+
+간밤 美증시는 다우와 S&amp;P500, 나스닥이 모두 소폭 밀리며 마감했습니다.
+다만 낙폭이 1% 이내에 그쳤고 필라델피아반도체지수는 3.38% 올라, 시장 전체가 한 방향으로 꺾였다기보다 업종별 온도 차가 컸던 밤으로 보는 게 맞겠습니다.
+
+핵심은 기술주 안에서도 반도체 쪽 상대 강도입니다.
+S&amp;P100 정기 변경에서 나이키가 빠지고 델 테크놀로지스와 샌디스크, 팔로알토 네트웍스, 아리스타 네트웍스가 새로 들어가는 점도 전통 소비재보다 기술 기업에 자금의 관심이 쏠린 흐름을 보여줍니다.
+
+좋은 점은 美 주요 지수의 하락폭이 크지 않았고 반도체지수가 강했다는 부분입니다.
+반면 공포지수가 전일보다 5.30% 올랐고 지수와 반도체 업종이 엇갈렸으니, 반도체 강세가 시장 전체로 확산됐다고 섣불리 보기는 어렵습니다.
+오늘도 지수보다 실제 수급이 붙는 업종을 확인하면서 보시는 게 좋겠습니다.
+
+국내는 전일 코스피가 4.61% 급등한 뒤라 상승 탄력과 차익실현이 함께 나올 수 있습니다.
+간밤 반도체 강세가 삼성전자와 SK하이닉스 흐름으로 이어지는지, 외국인과 기관 수급이 유지되는지 차분히 살펴봅시다.
+오늘도 힘차게 대응하시기 바랍니다!</p>
+      </div>
+      <div class="modal-footer">
+        <button class="copy-btn" id="copyBtn-chatSummaryText" onclick="copyText('chatSummaryText')">누르면 복사됩니다</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     function switchTab(name) {

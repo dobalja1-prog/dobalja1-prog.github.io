@@ -5,3 +5,5 @@ venv/
 run_log.txt
 .claude/
 .tmp_preview/
+output/
+for_gpt/

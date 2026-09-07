@@ -5,8 +5,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 from scraper.schedule_helper import is_run_day
 from scraper.market_snapshot import get_market_snapshot
-from ai.lunch import _build_prompt
-from history import get_recent
+from ai.lunch import _format_snapshot
 
 OUTPUT_DIR = "수집자료"
 
@@ -23,18 +22,15 @@ def main():
     snapshot = get_market_snapshot()
     print(snapshot)
 
-    recent_history = get_recent("lunch", today.isoformat())
-    prompt = _build_prompt(snapshot, today, recent_history)
-    prompt += (
-        "\n\n[최종 출력]\n"
-        "위 내용을 참고해서 단체방에 바로 붙여넣을 수 있는 하나의 자연스러운 "
-        "점심시간 브리핑 글만 작성해줘."
+    content = (
+        f"[{today.strftime('%Y.%m.%d')} 점심 수집자료 - 국내 증시 실시간 스냅샷]\n\n"
+        f"{_format_snapshot(snapshot)}"
     )
 
     import os
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write(prompt)
+        f.write(content)
 
     print(f"\n완료: {output_path} 에 저장됨. 이 파일 내용을 GPT에 복붙하세요.")
 

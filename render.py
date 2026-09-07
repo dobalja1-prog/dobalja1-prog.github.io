@@ -55,7 +55,7 @@ def _placeholder_panel(panel_id: str, message: str, active: bool = False) -> str
 def _render_morning_panel(morning: dict | None) -> tuple[str, str]:
     """(패널 HTML, 모달 HTML) 튜플을 반환. morning이 없으면 준비중 표시."""
     if morning is None:
-        return _placeholder_panel("morning", "브리핑 준비중입니다", active=True), ""
+        return _placeholder_panel("morning", "업데이트 준비중입니다", active=True), ""
 
     briefing = MarketBriefing.model_validate(morning)
 
@@ -118,7 +118,7 @@ def _render_morning_panel(morning: dict | None) -> tuple[str, str]:
 
 def _render_lunch_panel(lunch: dict | None) -> str:
     if lunch is None:
-        return _placeholder_panel("lunch", "브리핑 준비중입니다")
+        return _placeholder_panel("lunch", "업데이트 준비중입니다")
 
     briefing = LunchBriefing.model_validate(lunch)
 
@@ -137,7 +137,7 @@ def _render_lunch_panel(lunch: dict | None) -> str:
 
 def _render_close_panel(close: dict | None) -> str:
     if close is None:
-        return _placeholder_panel("close", "브리핑 준비중입니다")
+        return _placeholder_panel("close", "업데이트 준비중입니다")
 
     briefing = CloseBriefing.model_validate(close)
 

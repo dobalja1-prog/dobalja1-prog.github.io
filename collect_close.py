@@ -9,11 +9,12 @@ from scraper.naver_finance import get_domestic_close_headlines, get_article_text
 from ai.close import _build_prompt
 from history import get_recent
 
-OUTPUT_PATH = "for_gpt/close.txt"
+OUTPUT_DIR = "수집자료"
 
 
 def main():
     today = date.today()
+    output_path = f"{OUTPUT_DIR}/[{today.strftime('%Y.%m.%d')} 마감브리핑].txt"
 
     if not is_run_day(today):
         print("오늘은 주말이라 실행하지 않습니다.")
@@ -39,11 +40,11 @@ def main():
     )
 
     import os
-    os.makedirs("for_gpt", exist_ok=True)
-    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(prompt)
 
-    print(f"\n완료: {OUTPUT_PATH} 에 저장됨. 이 파일 내용을 GPT에 복붙하세요.")
+    print(f"\n완료: {output_path} 에 저장됨. 이 파일 내용을 GPT에 복붙하세요.")
 
 
 if __name__ == "__main__":

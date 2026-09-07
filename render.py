@@ -1,7 +1,6 @@
 import html as html_lib
 import re
 
-from ai.sections import SECTIONS
 from ai.summarizer import MarketBriefing
 from ai.lunch import LunchBriefing
 from ai.close import CloseBriefing
@@ -69,15 +68,6 @@ def _render_morning_panel(morning: dict | None) -> tuple[str, str]:
         for s in briefing.key_stats
     )
 
-    sections_html = "\n".join(
-        f"""
-        <section class="card">
-          <h2><span class="num">{i+1}</span>{_escape(SECTIONS[i]["title"])}</h2>
-          <p>{_escape(s.content)}</p>
-        </section>"""
-        for i, s in enumerate(briefing.sections)
-    )
-
     panel = f"""
   <div class="tab-panel active" id="panel-morning">
     <div class="hero">
@@ -88,32 +78,16 @@ def _render_morning_panel(morning: dict | None) -> tuple[str, str]:
       </div>
     </div>
 
-    <div class="summary-btn-wrap">
-      <button class="summary-btn" onclick="document.getElementById('summaryModal').classList.add('open')">브리핑 요약하기</button>
-    </div>
-
     <main>
-      {sections_html}
+      <section class="card">
+        <p class="chat-text">{_escape_chat(briefing.chat_summary)}</p>
+      </section>
     </main>
   </div>"""
 
-    modal = f"""
-  <div class="modal-overlay" id="summaryModal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3>브리핑 요약</h3>
-        <button class="modal-close" onclick="document.getElementById('summaryModal').classList.remove('open')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="chat-text" id="chatSummaryText">{_escape_chat(briefing.chat_summary)}</p>
-      </div>
-      <div class="modal-footer">
-        <button class="copy-btn" id="copyBtn-chatSummaryText" onclick="copyText('chatSummaryText')">누르면 복사됩니다</button>
-      </div>
-    </div>
-  </div>"""
-
-    return panel, modal
+    # 오전 브리핑은 여섯 개의 내부 분석 항목 대신 하나의 흐르는 코멘트로
+    # 보여준다. 세부 섹션은 생성 품질 검증용 데이터로만 보관한다.
+    return panel, ""
 
 
 def _render_lunch_panel(lunch: dict | None) -> str:

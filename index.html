@@ -348,7 +348,7 @@
 
     <main>
       <section class="card">
-        <p class="chat-text">좋은 아침입니다.
+        <p class="chat-text" id="morningText">좋은 아침입니다.
 
 간밤 美증시는 다우와 S&amp;P500, 나스닥이 모두 소폭 밀리며 마감했습니다.
 다만 낙폭이 1% 이내에 그쳤고 필라델피아반도체지수는 3.38% 올라, 시장 전체가 한 방향으로 꺾였다기보다 업종별 온도 차가 컸던 밤으로 보는 게 맞겠습니다.
@@ -365,6 +365,9 @@ S&amp;P100 정기 변경에서 나이키가 빠지고 델 테크놀로지스와 
 오늘도 힘차게 대응하시기 바랍니다!</p>
       </section>
     </main>
+    <div class="summary-btn-wrap">
+      <button class="copy-btn" id="copyBtn-morningText" onclick="copyText('morningText')">누르면 복사됩니다</button>
+    </div>
   </div>
 
   <div class="tab-panel" id="panel-lunch">

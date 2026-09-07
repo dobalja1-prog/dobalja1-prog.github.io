@@ -80,9 +80,12 @@ def _render_morning_panel(morning: dict | None) -> tuple[str, str]:
 
     <main>
       <section class="card">
-        <p class="chat-text">{_escape_chat(briefing.chat_summary)}</p>
+        <p class="chat-text" id="morningText">{_escape_chat(briefing.chat_summary)}</p>
       </section>
     </main>
+    <div class="summary-btn-wrap">
+      <button class="copy-btn" id="copyBtn-morningText" onclick="copyText('morningText')">누르면 복사됩니다</button>
+    </div>
   </div>"""
 
     # 오전 브리핑은 여섯 개의 내부 분석 항목 대신 하나의 흐르는 코멘트로

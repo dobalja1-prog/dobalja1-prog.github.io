@@ -94,22 +94,9 @@ def _render_morning_panel(morning: dict | None) -> tuple[str, str]:
 
 
 def _render_lunch_panel(lunch: dict | None) -> str:
-    if lunch is None:
-        return _placeholder_panel("lunch", "업데이트 준비중입니다")
-
-    briefing = LunchBriefing.model_validate(lunch)
-
-    return f"""
-  <div class="tab-panel" id="panel-lunch">
-    <div class="panel-content">
-      <div class="card">
-        <p class="chat-text" id="lunchText">{_escape_chat(briefing.text)}</p>
-      </div>
-      <div class="summary-btn-wrap" style="padding:0; margin-top:12px;">
-        <button class="copy-btn" id="copyBtn-lunchText" onclick="copyText('lunchText')">누르면 복사됩니다</button>
-      </div>
-    </div>
-  </div>"""
+    # 점심 브리핑은 현재 운영하지 않는다. 기존 데이터가 남아 있더라도
+    # 화면에는 노출하지 않아 이용자에게 일관된 상태를 보여준다.
+    return _placeholder_panel("lunch", "현재 운영중이지 않습니다.")
 
 
 def _render_close_panel(close: dict | None) -> str:
@@ -133,6 +120,7 @@ def _render_close_panel(close: dict | None) -> str:
 
 def render_html(state: dict, generated_date) -> str:
     date_str = generated_date.strftime("%Y년 %m월 %d일")
+    generated_date_iso = generated_date.isoformat()
     weekday_kr = ["월", "화", "수", "목", "금", "토", "일"][generated_date.weekday()]
 
     morning_panel, morning_modal = _render_morning_panel(state.get("morning"))
@@ -440,7 +428,7 @@ def render_html(state: dict, generated_date) -> str:
 
   <div class="hero-header">
     <div class="hero-header-inner">
-      <div class="hero-date">{date_str} ({weekday_kr})</div>
+      <div class="hero-date" id="briefingDate">{date_str} ({weekday_kr})</div>
       <div class="tabbar">
         <button class="tab-btn active" id="tabbtn-morning" onclick="switchTab('morning')">개장 전 브리핑</button>
         <button class="tab-btn" id="tabbtn-lunch" onclick="switchTab('lunch')">점심시간</button>
@@ -458,6 +446,44 @@ def render_html(state: dict, generated_date) -> str:
 {morning_modal}
 
   <script>
+    var generatedDate = '{generated_date_iso}';
+
+    function getKoreanDate() {{
+      var parts = new Intl.DateTimeFormat('en-CA', {{
+        timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
+      }}).formatToParts(new Date());
+      var values = {{}};
+      parts.forEach(function(part) {{ values[part.type] = part.value; }});
+      return values.year + '-' + values.month + '-' + values.day;
+    }}
+
+    function showPlaceholder(panelId, message) {{
+      var panel = document.getElementById('panel-' + panelId);
+      if (!panel) return;
+      panel.innerHTML = '<div class="panel-content"><div class="card placeholder-msg">' + message + '</div></div>';
+    }}
+
+    function prepareNextBriefing() {{
+      var today = getKoreanDate();
+      if (today <= generatedDate) return;
+
+      ['morning', 'close'].forEach(function(panelId) {{
+        showPlaceholder(panelId, '업데이트 준비중입니다.');
+      }});
+      showPlaceholder('lunch', '현재 운영중이지 않습니다.');
+      var hero = document.querySelector('#panel-morning .hero');
+      if (hero) hero.remove();
+      var dateElement = document.getElementById('briefingDate');
+      if (dateElement) {{
+        dateElement.textContent = new Intl.DateTimeFormat('ko-KR', {{
+          timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'
+        }}).format(new Date());
+      }}
+    }}
+
+    prepareNextBriefing();
+    setInterval(prepareNextBriefing, 60000);
+
     function switchTab(name) {{
       ['morning', 'lunch', 'close'].forEach(function(n) {{
         document.getElementById('panel-' + n).classList.toggle('active', n === name);

@@ -299,7 +299,7 @@
 
   <div class="hero-header">
     <div class="hero-header-inner">
-      <div class="hero-date">2026년 09월 10일 (목)</div>
+      <div class="hero-date" id="briefingDate">2026년 09월 10일 (목)</div>
       <div class="tabbar">
         <button class="tab-btn active" id="tabbtn-morning" onclick="switchTab('morning')">개장 전 브리핑</button>
         <button class="tab-btn" id="tabbtn-lunch" onclick="switchTab('lunch')">점심시간</button>
@@ -376,32 +376,7 @@
 
   <div class="tab-panel" id="panel-lunch">
     <div class="panel-content">
-      <div class="card">
-        <p class="chat-text" id="lunchText">🍚점심 시간
-
-오전장 여기서 마무리하겠습니다.
-
-오늘은 양 지수가 장중 저점에서 출발해 고가권까지 올라온 흐름입니다.
-코스피가 7,070선에 가까이 붙었고 코스닥도 830선을 앞두고 있어, 오전 내내 아래에서 받아주는 힘은 분명히 확인됐네요.
-
-다만 코스피는 지수 오름폭만큼 종목 체감이 넓게 퍼진 모습은 아닙니다.
-하락 종목이 조금 더 많은 편이라 지수 강세를 시장 전체의 동반 상승으로 보기는 아직 이르고, 장중 고가를 지키는 힘을 조금 더 봐야겠죠.
-
-수급도 한쪽으로 정리되진 않았습니다.
-기관이 코스피에서 3천억 원대 순매수로 지수를 받치고 있지만 외국인은 순매도이고, 개인 매도도 큰 편입니다.
-오후에 외국인 매도가 줄어들면서 기관 매수가 계속 이어지는지 살펴볼 만합니다.
-
-반대로 코스닥은 오른 종목이 넉넉하게 우세한 데다 외국인과 기관이 함께 순매수입니다.
-지수 상승과 시장 안쪽 분위기가 같이 움직이는 쪽은 코스닥이 더 선명하네요.
-
-오후에는 코스피가 오전 고가 부근을 지키는지, 코스닥도 830선 앞에서 매수세가 이어지는지를 보시죠.
-양쪽 흐름이 계속 갈리는지 여부도 참고할 만합니다.
-
-점심 맛있게 드시고 오후에 뵙겠습니다!</p>
-      </div>
-      <div class="summary-btn-wrap" style="padding:0; margin-top:12px;">
-        <button class="copy-btn" id="copyBtn-lunchText" onclick="copyText('lunchText')">누르면 복사됩니다</button>
-      </div>
+      <div class="card placeholder-msg">현재 운영중이지 않습니다.</div>
     </div>
   </div>
 
@@ -449,6 +424,44 @@
 
 
   <script>
+    var generatedDate = '2026-09-10';
+
+    function getKoreanDate() {
+      var parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).formatToParts(new Date());
+      var values = {};
+      parts.forEach(function(part) { values[part.type] = part.value; });
+      return values.year + '-' + values.month + '-' + values.day;
+    }
+
+    function showPlaceholder(panelId, message) {
+      var panel = document.getElementById('panel-' + panelId);
+      if (!panel) return;
+      panel.innerHTML = '<div class="panel-content"><div class="card placeholder-msg">' + message + '</div></div>';
+    }
+
+    function prepareNextBriefing() {
+      var today = getKoreanDate();
+      if (today <= generatedDate) return;
+
+      ['morning', 'close'].forEach(function(panelId) {
+        showPlaceholder(panelId, '업데이트 준비중입니다.');
+      });
+      showPlaceholder('lunch', '현재 운영중이지 않습니다.');
+      var hero = document.querySelector('#panel-morning .hero');
+      if (hero) hero.remove();
+      var dateElement = document.getElementById('briefingDate');
+      if (dateElement) {
+        dateElement.textContent = new Intl.DateTimeFormat('ko-KR', {
+          timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'
+        }).format(new Date());
+      }
+    }
+
+    prepareNextBriefing();
+    setInterval(prepareNextBriefing, 60000);
+
     function switchTab(name) {
       ['morning', 'lunch', 'close'].forEach(function(n) {
         document.getElementById('panel-' + n).classList.toggle('active', n === name);

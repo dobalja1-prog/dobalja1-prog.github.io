@@ -1,5 +1,6 @@
 import html as html_lib
 import re
+from datetime import date
 
 from ai.summarizer import MarketBriefing
 from ai.lunch import LunchBriefing
@@ -99,15 +100,18 @@ def _render_lunch_panel(lunch: dict | None) -> str:
     return _placeholder_panel("lunch", "현재 운영중이지 않습니다.")
 
 
-def _render_close_panel(close: dict | None) -> str:
+def _render_close_panel(close: dict | None, generated_date: date) -> str:
     if close is None:
         return _placeholder_panel("close", "업데이트 준비중입니다")
 
     briefing = CloseBriefing.model_validate(close)
+    weekday_kr = ["월", "화", "수", "목", "금", "토", "일"][generated_date.weekday()]
+    date_label = generated_date.strftime("%Y년 %m월 %d일")
 
     return f"""
   <div class="tab-panel" id="panel-close">
     <div class="panel-content">
+      <div class="close-date">{date_label} ({weekday_kr})</div>
       <div class="card">
         <p class="chat-text" id="closeText">{_escape_chat(briefing.text)}</p>
       </div>
@@ -125,7 +129,7 @@ def render_html(state: dict, generated_date) -> str:
 
     morning_panel, morning_modal = _render_morning_panel(state.get("morning"))
     lunch_panel = _render_lunch_panel(state.get("lunch"))
-    close_panel = _render_close_panel(state.get("close"))
+    close_panel = _render_close_panel(state.get("close"), generated_date)
 
     return f"""<!DOCTYPE html>
 <html lang="ko">
@@ -390,6 +394,12 @@ def render_html(state: dict, generated_date) -> str:
     cursor: pointer;
     color: var(--sub);
     padding: 4px;
+  }}
+  .close-date {{
+    margin: 0 0 10px 4px;
+    color: #8c929c;
+    font-size: .82rem;
+    font-weight: 700;
   }}
   .modal-body {{
     padding: 18px;

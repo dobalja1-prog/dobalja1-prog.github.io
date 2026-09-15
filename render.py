@@ -52,12 +52,14 @@ def _placeholder_panel(panel_id: str, message: str, active: bool = False) -> str
   </div>"""
 
 
-def _render_morning_panel(morning: dict | None) -> tuple[str, str]:
+def _render_morning_panel(morning: dict | None, generated_date: date) -> tuple[str, str]:
     """(패널 HTML, 모달 HTML) 튜플을 반환. morning이 없으면 준비중 표시."""
     if morning is None:
         return _placeholder_panel("morning", "업데이트 준비중입니다", active=True), ""
 
     briefing = MarketBriefing.model_validate(morning)
+    weekday_kr = ["월", "화", "수", "목", "금", "토", "일"][generated_date.weekday()]
+    date_label = generated_date.strftime("%Y년 %m월 %d일")
 
     stats_html = "\n".join(
         f"""
@@ -80,6 +82,7 @@ def _render_morning_panel(morning: dict | None) -> tuple[str, str]:
     </div>
 
     <main>
+      <div class="close-date">{date_label} ({weekday_kr})</div>
       <section class="card">
         <p class="chat-text" id="morningText">{_escape_chat(briefing.chat_summary)}</p>
       </section>
@@ -127,7 +130,7 @@ def render_html(state: dict, generated_date) -> str:
     generated_date_iso = generated_date.isoformat()
     weekday_kr = ["월", "화", "수", "목", "금", "토", "일"][generated_date.weekday()]
 
-    morning_panel, morning_modal = _render_morning_panel(state.get("morning"))
+    morning_panel, morning_modal = _render_morning_panel(state.get("morning"), generated_date)
     lunch_panel = _render_lunch_panel(state.get("lunch"))
     close_panel = _render_close_panel(state.get("close"), generated_date)
 

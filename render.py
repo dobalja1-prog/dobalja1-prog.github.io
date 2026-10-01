@@ -98,9 +98,8 @@ def _render_morning_panel(morning: dict | None, generated_date: date) -> tuple[s
 
 
 def _render_lunch_panel(lunch: dict | None) -> str:
-    # 점심 브리핑은 현재 운영하지 않는다. 기존 데이터가 남아 있더라도
-    # 화면에는 노출하지 않아 이용자에게 일관된 상태를 보여준다.
-    return _placeholder_panel("lunch", "현재 운영중이지 않습니다.")
+    # 자동 시황 브리핑이 중단된 동안에는 모든 탭을 동일한 준비 상태로 둔다.
+    return _placeholder_panel("lunch", "업데이트 준비중입니다.")
 
 
 def _render_close_panel(close: dict | None, generated_date: date) -> str:
